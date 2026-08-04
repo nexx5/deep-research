@@ -204,18 +204,20 @@ opencode.json
 
 ## Skill 结构
 
-| Skill | 用途 | 随包发布 |
-|---|---|---|
-| 多源搜索 | 搜索编排（国内 bing/searxng/baidu；国际 google/bing/duckduckgo；Tavily 按需） | 否（全局 skill） |
-| 快速调研师 | 快速摸底调研：多视角 + agentic 检索闭环 + 强制引用 | 是 |
-| zhishibao | 知识包管理：断言写入、语义/关键词/关系检索、索引、健康诊断 | 是 |
-| qmd | 本地文档搜索与索引 | 是 |
-| html-report | HTML 报告渲染 | 否（全局 skill） |
-| super-slide | 幻灯片生成 | 是 |
-| 去AI味儿 | 报告/文本润色 | 是 |
-| opendataloader-pdf | PDF 文本提取 | 是 |
+> **Skill 单独开源说明**：本平台所用的 Skill 后续将**单独开源**（独立仓库发布），以便独立演进与复用。当前版本为开箱即用暂时内置在 `.opencode/skills/`；独立仓库地址发布后会在本节补充链接。欢迎按需选用、改造或独立分发。
 
-`多源搜索` 与 `html-report` 是全局 skill 例外，不随运行包分发；安装后平台采集与 HTML 渲染能力完整，缺失时其余功能不受影响。
+| Skill | 用途 | 当前分发 |
+|---|---|---|
+| 多源搜索 | 搜索编排（国内 bing/searxng/baidu；国际 google/bing/duckduckgo；Tavily 按需） | 全局 skill（另行部署，后续单独开源） |
+| 快速调研师 | 快速摸底调研：多视角 + agentic 检索闭环 + 强制引用 | 随包内置，后续单独开源 |
+| zhishibao | 知识包管理：断言写入、语义/关键词/关系检索、索引、健康诊断 | 随包内置，后续单独开源 |
+| qmd | 本地文档搜索与索引 | 随包内置，后续单独开源 |
+| html-report | HTML 报告渲染 | 全局 skill（另行部署，后续单独开源） |
+| super-slide | 幻灯片生成 | 随包内置，后续单独开源 |
+| 去AI味儿 | 报告/文本润色 | 随包内置，后续单独开源 |
+| opendataloader-pdf | PDF 文本提取 | 随包内置，后续单独开源 |
+
+`多源搜索` 与 `html-report` 是全局 skill 例外，安装后平台采集与 HTML 渲染能力完整，缺失时其余功能不受影响。
 
 ---
 
