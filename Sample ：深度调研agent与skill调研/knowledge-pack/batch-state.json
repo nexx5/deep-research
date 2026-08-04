@@ -1,0 +1,20 @@
+{
+  "batch_id": "",
+  "phase": "consolidation",
+  "sources_done": 38,
+  "sources_remaining": 0,
+  "claims_count": 914,
+  "debates_count": 0,
+  "schools_count": 0,
+  "leads_count": 53,
+  "evidence_files": {
+    "raw": 38,
+    "extract": 38,
+    "analysis": 38
+  },
+  "lead_pool": {
+    "P0": 0,
+    "P1": 0
+  },
+  "last_checkpoint": "2026-08-04T10:14:16.861446+00:00"
+}

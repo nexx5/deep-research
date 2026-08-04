@@ -1,0 +1,4 @@
+{"claim_a": "CL00169", "claim_b": "CL00564", "relation_type": "opposing", "strength": "strong", "context": "OpenDeepResearch主张研究阶段supervisor多agent并行有效 vs Cognition主张全流程反多agent（A002冲突1）", "created": "2026-08-04T09:43:04.831984+00:00"}
+{"claim_a": "CL00268", "claim_b": "CL00274", "relation_type": "opposing", "strength": "strong", "context": "Gemini官方发布文称支持JSON schema结构化输出 vs API文档称不支持结构化输出（A007官方内部矛盾）", "created": "2026-08-04T09:43:04.831984+00:00"}
+{"claim_a": "CL00608", "claim_b": "CL00262", "relation_type": "opposing", "strength": "strong", "context": "学术审计: 商业LLM与deep research agent引用URL存在3-13%幻觉率 vs 官方声称Gemini减少幻觉（A024声称vs实测）", "created": "2026-08-04T09:43:04.831984+00:00"}
+{"claim_a": "CL00730", "claim_b": "CL00564", "relation_type": "opposing", "strength": "strong", "context": "Anthropic将orchestrator-workers列为合法workflow模式 vs Cognition默认排除多agent（A031三方立场张力）", "created": "2026-08-04T09:43:04.831984+00:00"}

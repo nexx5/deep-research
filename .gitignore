@@ -20,6 +20,12 @@ knowledge-pack/
 # 进行中的 sample 调研项目（跑完后再决定是否作为示例发布）
 深度调研agent与skill调研/
 
+# Sample 示例项目（已跑完，完整发布为使用示例）
+!Sample ：深度调研agent与skill调研/
+!Sample ：深度调研agent与skill调研/**/*.html
+!Sample ：深度调研agent与skill调研/knowledge-pack/
+!Sample ：深度调研agent与skill调研/knowledge-pack/**
+
 # Python 运行缓存
 __pycache__/
 *.pyc
