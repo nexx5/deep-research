@@ -1,4 +1,4 @@
-﻿# 调研管理平台
+# 调研管理平台
 
 > 一个把"调研"变成**可检查、可追溯、可沉淀、可复用、可知识输出**工程流程的 agent 工作流平台。
 > 基于 opencode agent 体系构建，面向需要严肃、可信、可复用知识产出的个人与团队。
@@ -208,7 +208,7 @@ opencode.json
 
 | Skill | 用途 | 当前分发 |
 |---|---|---|
-| 多源搜索 | 搜索编排（国内 bing/searxng/baidu；国际 google/bing/duckduckgo；Tavily 按需） | 全局 skill（另行部署，后续单独开源） |
+| 多源搜索 | 搜索编排（国内 bing/searxng/baidu；国际 google/bing/duckduckgo；Tavily 按需）；支持搜索、爬取网页并提取为md | 全局 skill（另行部署，后续单独开源） |
 | 快速调研师 | 快速摸底调研：多视角 + agentic 检索闭环 + 强制引用 | 随包内置，后续单独开源 |
 | zhishibao | 知识包管理：断言写入、语义/关键词/关系检索、索引、健康诊断 | 随包内置，后续单独开源 |
 | qmd | 本地文档搜索与索引 | 随包内置，后续单独开源 |
@@ -284,7 +284,6 @@ strategy_tags:   决定来源处理（社区反馈/电商评价/售后投诉/官
 
 - 社区平台抓取能力仍在建设中：搜不到全文时记录为线索/死胡同/能力缺口，不静默忽略。
 - `多源搜索`、`html-report` 作为全局 skill 单独部署，不随运行包发布；没有它们时平台仍可完成骨架、状态检查、方案确认与已有资料分析，只是网络采集/HTML 渲染受限。
-- 当前发布包以 Windows PowerShell 脚本为主。
 - 报告 agent 只生成自然 Markdown，HTML 渲染由 html-report skill 负责。
 
 ---
@@ -335,11 +334,10 @@ strategy_tags:   决定来源处理（社区反馈/电商评价/售后投诉/官
 
 | Skill | 上游来源 |
 |---|---|
-| qmd | 直接使用 npm 开源包 `@tobilu/qmd`（本地文档搜索引擎）；检索与重排序基于 Qwen 系列开源模型（Qwen3-Embedding、Qwen3-Reranker） |
+| qmd | 直接使用 npm 开源包 `@tobilu/qmd`（本地文档搜索引擎）） |
 | opendataloader-pdf | 直接使用同名开源项目（PyPI / npm / Maven 多通道分发）；混合 AI 模式基于 IBM 开源文档解析工具 Docling；布局与阅读顺序分析借鉴 XY-Cut++ 算法 |
-| 多源搜索 | 搜索编排参考开源元搜索引擎 SearXNG，并集成 Bing、Baidu、Google、DuckDuckGo、Tavily 等开放接口 |
+| 多源搜索 | 搜索编排参考了多个开源元搜索引擎。 |
 | html-report / super-slide / 快速调研师 | 平台自研，设计思路受开源 agent skill 生态启发 |
 
-独立 Skill 仓库开源后将补充各 Skill 的详细依赖清单与许可证声明。
 
 此外，本项目的调研方法论、工作流设计与技术思路广泛借鉴了众多开源项目与社区实践，受益良多，在此一并致谢，恕不一一列举。
