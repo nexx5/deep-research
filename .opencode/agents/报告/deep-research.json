@@ -1,0 +1,47 @@
+{
+  "name": "deep-research",
+  "label": "深度调研报告",
+  "reader": "技术负责人——了解LLM基本概念，但不了解本调研领域的最新进展",
+  "structure": "horizontal-vertical",
+  "narrative": {
+    "opening": "SCQA",
+    "argument": "CER",
+    "progression": "DataStoryArc",
+    "conflict": "dialectic",
+    "closing": "AIDA"
+  },
+  "layout": "single-column",
+  "layout_options": { "sidebar": "optional" },
+  "theme_default": "blue-orange",
+  "theme_overridable": true,
+  "components": [
+    "reader-profile",
+    "executive-summary",
+    "timeline-vertical",
+    "card-comparison",
+    "conflict-view",
+    "gap-box",
+    "evidence-chain",
+    "source-tag",
+    "concept-card",
+    "recommendation-matrix"
+  ],
+  "sections": [
+    { "id": "reader-profile", "title": "读者定位", "required": true },
+    { "id": "executive-summary", "title": "核心结论", "required": true },
+    { "id": "vertical-narrative", "title": "纵向：领域演变", "required": true },
+    { "id": "horizontal-comparison", "title": "横向：方案对比", "required": true },
+    { "id": "intersection", "title": "交汇：推荐方案", "required": true },
+    { "id": "conflicts", "title": "取舍与矛盾", "required": false },
+    { "id": "gaps", "title": "未解问题", "required": true },
+    { "id": "sources", "title": "来源", "required": true }
+  ],
+  "writing_rules": [
+    "先讲故事再讲概念，不先甩定义",
+    "每个技术名词配一句人话类比",
+    "章节标题说人话，如'为什么Markdown不够用了'而非'格式对比分析'",
+    "段落之间有过渡句",
+    "概念三步走：痛点→是什么→怎么工作",
+    "结论性图表标题"
+  ]
+}

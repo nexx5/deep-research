@@ -1,0 +1,39 @@
+adapter:
+  name: openalex
+  type: http
+  capabilities:
+    - keyword
+    - academic
+  rate_limit:
+    requests_per_min: 60
+    adaptive: false
+    note: "无 Key，建议加 mailto 参数提高礼貌配额"
+  config:
+    endpoint: "https://api.openalex.org/works"
+    method: GET
+    response_format: json
+    default_params:
+      per-page: 10
+      sort: relevance_score:desc
+      mailto: "research@local"
+    query_syntax:
+      search: "全文搜索"
+      filter: "过滤（publication_year/type/open_access.is_oa 等）"
+      sort: "排序（cited_by_count:desc/relevance_score:desc）"
+      cursor: "游标分页（大量结果时用）"
+    proxy_required: false
+  result_mapping:
+    title: "results[].title"
+    url: "results[].primary_location.landing_page_url || results[].id"
+    snippet: "results[].abstract_inverted_index (还原为正序文本)"
+    content: "results[].abstract_inverted_index (还原为正序文本)"
+    pdf_url: "results[].primary_location.pdf_url || results[].open_access.oa_url"
+    authors: "results[].authorships[].author.display_name"
+    cited_by_count: "results[].cited_by_count"
+    publication_year: "results[].publication_year"
+    doi: "results[].doi"
+    is_oa: "results[].open_access.is_oa"
+  abstract_format: "inverted_index"
+  abstract_restore_note: "遍历 abstract_inverted_index 键值对，将词放到对应位置索引，拼接成完整摘要。缺失时 snippet 留空。"
+  fulltext_strategy: "pdf_url_if_oa"
+  enabled: true

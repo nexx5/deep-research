@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "School 流派格式",
+  "description": "流派归纳，由体系化层从claims的characteristics聚类生成",
+  "type": "object",
+  "required": ["school_id", "name", "core_claims", "characteristics", "boundaries"],
+  "properties": {
+    "school_id": {
+      "type": "string",
+      "pattern": "^SC\\d{3}$"
+    },
+    "name": {
+      "type": "string",
+      "description": "流派名称，如：向量派/文件派/图谱派/模型派"
+    },
+    "core_claims": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^CL\\d{5}$"},
+      "description": "此流派的核心断言ID列表"
+    },
+    "representatives": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "代表项目/来源"
+    },
+    "boundaries": {
+      "type": "string",
+      "description": "此流派的适用边界"
+    },
+    "characteristics": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "此流派的共同特点标签"
+    },
+    "evolution_path": {
+      "type": "string",
+      "description": "演进路径：此流派从何演化而来，向何方向演化"
+    },
+    "opposing_schools": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^SC\\d{3}$"},
+      "description": "对立流派ID列表"
+    },
+    "created": {"type": "string", "format": "date-time"}
+  }
+}

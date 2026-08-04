@@ -1,0 +1,13 @@
+{
+  "embed": {
+    "base_url": "",
+    "api_key": "",
+    "model": ""
+  },
+  "search_weights": {
+    "like": 0.4,
+    "vector": 0.6,
+    "auto_boost_short_query": true,
+    "short_query_threshold": 4
+  }
+}

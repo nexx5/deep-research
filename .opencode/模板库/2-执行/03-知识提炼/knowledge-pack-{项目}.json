@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "name": "",
+    "goal": "",
+    "research_type": "",
+    "created_at": "",
+    "updated_at": "",
+    "iteration_count": 0
+  },
+  "project_knowledge_schema": {
+    "purpose": [],
+    "future_uses": [
+      "reporting",
+      "conversation",
+      "analysis",
+      "comparison",
+      "extension"
+    ],
+    "domain_schema": {
+      "node_types": [],
+      "edge_types": [],
+      "required_chains": [],
+      "required_maps": [],
+      "completion_checks": []
+    },
+    "core_questions": [],
+    "conversation_goals": [],
+    "reporting_goals": [],
+    "comparison_anchors": []
+  },
+  "source_registry": [],
+  "concept_registry": [],
+  "claim_registry": [],
+  "evidence_registry": [
+    {
+      "evidence_id": "EV-001",
+      "source_id": "S001",
+      "raw_id": "raw-S001",
+      "extract_id": "采集记录-S001",
+      "analysis_ids": [],
+      "canonical_ref_id": "REF-001",
+      "evidence_role": "supports",
+      "quote_or_detail": "",
+      "source_type": "source_code",
+      "display_citation": "",
+      "external_reference": {
+        "title": "",
+        "url": "",
+        "repo": "",
+        "file_path": "",
+        "local_path": "",
+        "symbol": "",
+        "line_range": ""
+      }
+    }
+  ],
+  "graph": {
+    "nodes": [
+      {
+        "id": "",
+        "type": "",
+        "name": "",
+        "evidence_refs": [
+          {
+            "evidence_id": "EV-001",
+            "canonical_ref_id": "REF-001",
+            "evidence_role": "supports"
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "",
+        "target": "",
+        "type": "",
+        "evidence_refs": [
+          {
+            "evidence_id": "EV-001",
+            "canonical_ref_id": "REF-001",
+            "evidence_role": "supports"
+          }
+        ]
+      }
+    ]
+  },
+  "chains": [
+    {
+      "id": "",
+      "name": "",
+      "steps": [],
+      "evidence_refs": [
+        {
+          "evidence_id": "EV-001",
+          "canonical_ref_id": "REF-001",
+          "evidence_role": "supports"
+        }
+      ]
+    }
+  ],
+  "question_index": {
+    "can_answer": [],
+    "cannot_answer_yet": [],
+    "deep_questions": []
+  },
+  "coverage_map": {},
+  "application_support": {
+    "conversation_support": {
+      "can_support_dialogue": false,
+      "supported_question_types": [],
+      "known_limits": []
+    },
+    "reporting_support": {
+      "default_report_type": "overview-md",
+      "available_report_types": [],
+      "evidence_policy": "报告默认不暴露内部ID或置信度标记"
+    },
+    "comparison_support": {
+      "comparison_anchors": [],
+      "comparable_projects": []
+    },
+    "extension_support": {
+      "open_questions": [],
+      "next_research_directions": []
+    }
+  },
+  "legacy_compat": {
+    "概念图谱": {},
+    "核心概念字典": {},
+    "关键发现": [],
+    "矛盾与争议": [],
+    "未解决问题": [],
+    "调研资料索引": []
+  },
+  "update_log": []
+}

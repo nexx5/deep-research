@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Debate 争议议题格式",
+  "description": "多个观点的冲突共存记录，默认coexist，同特点同边界矛盾才unresolved",
+  "type": "object",
+  "required": ["debate_id", "topic", "positions", "status"],
+  "properties": {
+    "debate_id": {
+      "type": "string",
+      "pattern": "^DB\\d{4}$"
+    },
+    "topic": {
+      "type": "string",
+      "description": "争议主题"
+    },
+    "positions": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["name", "claims", "characteristics", "pros", "cons"],
+        "properties": {
+          "name": {"type": "string", "description": "立场名称，如：向量派/文件派"},
+          "claims": {
+            "type": "array",
+            "items": {"type": "string", "pattern": "^CL\\d{5}$"},
+            "description": "支撑此立场的断言ID列表"
+          },
+          "characteristics": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "此立场的特点标签"
+          },
+          "representatives": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "代表项目/来源"
+          },
+          "pros": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "优势"
+          },
+          "cons": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "劣势"
+          },
+          "evidence_strength": {
+            "type": "string",
+            "enum": ["strong", "moderate", "weak"]
+          }
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["coexist", "unresolved", "superseded"],
+      "default": "coexist",
+      "description": "coexist=不同特点共存；unresolved=同特点同边界矛盾待仲裁；superseded=已被新观点替代"
+    },
+    "resolution": {
+      "type": "string",
+      "description": "解决方案说明。coexist时说明各自适用场景；unresolved时说明待仲裁原因"
+    },
+    "created": {"type": "string", "format": "date-time"}
+  }
+}

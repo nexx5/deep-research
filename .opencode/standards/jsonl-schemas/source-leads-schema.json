@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Source Lead 线索格式",
+  "description": "线索池条目，触发类型×识别对象矩阵",
+  "type": "object",
+  "required": ["lead_id", "trigger_type", "target_type", "target", "context", "source_article", "priority", "status"],
+  "properties": {
+    "lead_id": {
+      "type": "string",
+      "pattern": "^LD\\d{6}$"
+    },
+    "trigger_type": {
+      "type": "string",
+      "enum": ["新采集", "重评", "冲突", "验证", "时效", "缺口"],
+      "description": "触发类型：6类事件型线索"
+    },
+    "target_type": {
+      "type": "string",
+      "enum": ["论文", "仓库", "概念", "对立", "数据", "方法", "人物", "政策", "案例", "URL"],
+      "description": "识别对象：10类可扩展"
+    },
+    "target": {
+      "type": "string",
+      "description": "线索目标，如论文标题/仓库地址/概念名/URL"
+    },
+    "context": {
+      "type": "string",
+      "description": "线索上下文（匹配位置前后各100字）"
+    },
+    "source_article": {
+      "type": "string",
+      "description": "线索来源文章文件名"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["P0", "P1", "P2"],
+      "description": "P0=多源引用+高相关，立即入队；P1=单源引用+高相关，入池待办；P2=低相关，丢弃"
+    },
+    "reference_count": {
+      "type": "integer",
+      "default": 1,
+      "description": "被多少篇文章引用（去重合并时累加）"
+    },
+    "related_outline_node": {
+      "type": "string",
+      "description": "关联的大纲节点。不关联任何节点的→P2"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "processing", "done", "dropped"],
+      "default": "pending"
+    },
+    "created": {"type": "string", "format": "date-time"}
+  }
+}

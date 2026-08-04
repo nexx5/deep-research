@@ -1,0 +1,29 @@
+# 本地环境配置（含真实密钥，禁止提交）
+.env
+
+# 依赖
+node_modules/
+package.json
+package-lock.json
+bun.lock
+
+# 平台运行期本地产物
+.task/
+快速调研目录/
+knowledge-pack/
+
+# 历史调研项目 / 临时报告 / 示例产物
+*/01-采集记录/原始资料/
+*/2-执行/01-采集记录/原始资料/
+*.html
+
+# 进行中的 sample 调研项目（跑完后再决定是否作为示例发布）
+深度调研agent与skill调研/
+
+# Python 运行缓存
+__pycache__/
+*.pyc
+
+# 系统文件
+.DS_Store
+Thumbs.db

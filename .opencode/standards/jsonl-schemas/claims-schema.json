@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claim 断言格式",
+  "description": "知识包中的原子知识单元，每条断言必须带证据链",
+  "type": "object",
+  "required": ["claim_id", "statement", "boundary", "source", "characteristics", "confidence", "evidence", "extraction_level", "created"],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "pattern": "^CL\\d{5}$",
+      "description": "断言ID，CL+五位数字"
+    },
+    "statement": {
+      "type": "string",
+      "description": "断言陈述（简洁的概念关系，不是完整句子）"
+    },
+    "boundary": {
+      "type": "string",
+      "description": "边界条件：在什么条件下成立。必填，不允许空"
+    },
+    "source": {
+      "type": "object",
+      "required": ["id", "title", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "来源ID，S+四位数字"},
+        "title": {"type": "string"},
+        "type": {"type": "string", "description": "项目拆解/论文解读/概念介绍/对比评测/官方文档/社区反馈等"}
+      }
+    },
+    "characteristics": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "description": "特点标签，用于跨源关联。如：向量检索/纯文件/需embedding/零依赖"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "置信度0-1，多源支撑+边界明确→高；单源/边界模糊→低"
+    },
+    "school": {
+      "type": "string",
+      "description": "流派标签，由体系化层填充。初期可为空"
+    },
+    "opposing": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^CL\\d{5}$"},
+      "description": "对立断言ID列表"
+    },
+    "possible_relations": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "弱模型采录时推断的可能关联（基于本文内容，不读全局）。如：与纯文件方案可能对立"
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["source_id", "quote"],
+        "properties": {
+          "source_id": {"type": "string"},
+          "quote": {"type": "string", "description": "原文摘录"},
+          "location": {"type": "string", "description": "定位，如L45-52或段落标题"},
+          "context": {"type": "string", "description": "该结论在原文中的论证上下文"}
+        }
+      },
+      "description": "证据链，必须非空。每条证据指向原文位置"
+    },
+    "extraction_level": {
+      "type": "string",
+      "enum": ["light", "deep"],
+      "description": "提取档位：轻量/深度"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "contested", "superseded", "stale"],
+      "default": "active"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

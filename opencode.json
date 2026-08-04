@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "research-orchestrator",
+  "model": "your-provider/your-model",
+  "subagent_depth": 2,
+  "agent": {
+    "采录员-deepseek": {
+      "mode": "subagent",
+      "model": "your-provider/your-model",
+      "description": "采录员（主力弱模型）。单篇处理：读取→价值判断→采录→分析→线索识别。请按你的模型 provider 修改 model 字段。",
+      "prompt": "{file:./.opencode/prompts/采录员-prompt.md}"
+    },
+    "采录员-hy3": {
+      "mode": "subagent",
+      "model": "your-provider/your-model",
+      "description": "采录员（弱模型对比组）。单篇处理：读取→价值判断→采录→分析→线索识别。请按你的模型 provider 修改 model 字段。",
+      "prompt": "{file:./.opencode/prompts/采录员-prompt.md}"
+    },
+    "采录员-qwen-27b": {
+      "mode": "subagent",
+      "model": "your-provider/your-model",
+      "description": "采录员（弱模型对比组）。单篇处理：读取→价值判断→采录→分析→线索识别。请按你的模型 provider 修改 model 字段。",
+      "prompt": "{file:./.opencode/prompts/采录员-prompt.md}"
+    },
+    "采录员-qwen-27m": {
+      "mode": "subagent",
+      "model": "your-provider/your-model",
+      "description": "采录员（弱模型对比组）。单篇处理：读取->价值判断->采录->分析->线索识别。请按你的模型 provider 修改 model 字段。",
+      "prompt": "{file:./.opencode/prompts/采录员-prompt.md}"
+    }
+  }
+}

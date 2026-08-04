@@ -1,0 +1,39 @@
+adapter:
+  name: arxiv
+  type: http
+  capabilities:
+    - keyword
+    - academic
+  rate_limit:
+    requests_per_min: 20
+    adaptive: false
+    note: "官方建议 3 秒间隔，无 Key"
+  config:
+    endpoint: "https://export.arxiv.org/api/query"
+    method: GET
+    response_format: atom_xml
+    default_params:
+      max_results: 10
+      sortBy: relevance
+      sortOrder: descending
+    query_syntax:
+      all: "全字段搜索"
+      ti: "仅标题"
+      abs: "仅摘要"
+      au: "仅作者"
+      cat: "按分类（cs.AI/cs.CL/cs.LG/cs.DB/cs.CR 等）"
+      combine: "AND/OR/ANDNOT，用 + 连接"
+    proxy_required: true
+    proxy: "socks5://127.0.0.1:4040"
+  result_mapping:
+    title: "entry > title"
+    url: "entry > link[rel=alternate] @href"
+    snippet: "entry > summary"
+    content: "entry > summary"
+    pdf_url: "entry > link[title=pdf] @href"
+    authors: "entry > author > name"
+    published_date: "entry > published"
+    categories: "entry > category @term"
+    arxiv_id: "entry > id (extract from URL)"
+  fulltext_strategy: "pdf_download"
+  enabled: true

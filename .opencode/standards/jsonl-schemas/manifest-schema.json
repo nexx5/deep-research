@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Manifest 知识包清单格式",
+  "description": "知识包身份证，自描述元数据",
+  "type": "object",
+  "required": ["pack_version", "schema_version", "project", "created", "updated", "stats", "index_layers"],
+  "properties": {
+    "pack_version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "schema_version": {
+      "type": "string",
+      "default": "1.0"
+    },
+    "project": {
+      "type": "string",
+      "description": "项目名"
+    },
+    "domain": {
+      "type": "string",
+      "description": "领域标签，如：AI/Agent/Memory"
+    },
+    "created": {"type": "string", "format": "date-time"},
+    "updated": {"type": "string", "format": "date-time"},
+    "stats": {
+      "type": "object",
+      "properties": {
+        "sources": {"type": "integer"},
+        "claims": {"type": "integer"},
+        "debates": {"type": "integer"},
+        "schools": {"type": "integer"},
+        "concepts": {"type": "integer"}
+      }
+    },
+    "index_layers": {
+      "type": "object",
+      "properties": {
+        "sqlite_fts5": {"type": "boolean", "default": true},
+        "qmd": {"type": "boolean", "default": false},
+        "graph": {"type": "boolean", "default": true}
+      },
+      "description": "已启用的索引层"
+    },
+    "retrieval_interface": {
+      "type": "string",
+      "default": "kb-retriever@1.0"
+    }
+  }
+}

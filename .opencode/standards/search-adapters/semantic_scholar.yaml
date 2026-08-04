@@ -1,0 +1,45 @@
+adapter:
+  name: semantic_scholar
+  type: http
+  capabilities:
+    - keyword
+    - academic
+  rate_limit:
+    requests_per_min: 20
+    adaptive: true
+    note: "无 Key 100 req/5min，易触发 429；有 Key 1 req/sec。申请：https://www.semanticscholar.org/product/api#api-key-form"
+    retry_on_429: true
+    retry_wait_seconds: 10
+    retry_max: 1
+  config:
+    endpoint: "https://api.semanticscholar.org/graph/v1/paper/search"
+    method: GET
+    response_format: json
+    default_params:
+      limit: 10
+      fields: "title,url,abstract,year,authors,citationCount,externalIds,openAccessPdf"
+    query_syntax:
+      query: "关键词搜索"
+      year: "按年份过滤（2024-2025）"
+      fields: "指定返回字段"
+    api_key_optional: true
+    api_key_header: "x-api-key"
+    proxy_required: true
+    proxy: "socks5://127.0.0.1:4040"
+  result_mapping:
+    title: "data[].title"
+    url: "data[].url || https://arxiv.org/abs/{data[].externalIds.ArXiv}"
+    snippet: "data[].abstract"
+    content: "data[].abstract"
+    pdf_url: "data[].openAccessPdf.url"
+    authors: "data[].authors[].name"
+    cited_by_count: "data[].citationCount"
+    publication_year: "data[].year"
+    doi: "data[].externalIds.DOI"
+    arxiv_id: "data[].externalIds.ArXiv"
+  fulltext_strategy: "pdf_url_if_available"
+  advanced_capabilities:
+    citation_network: "GET /graph/v1/paper/{paperId}/citations"
+    reference_network: "GET /graph/v1/paper/{paperId}/references"
+    note: "引用/参考网络为后续增强能力，当前适配器只做搜索"
+  enabled: true
