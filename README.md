@@ -326,3 +326,19 @@ strategy_tags:   决定来源处理（社区反馈/电商评价/售后投诉/官
 - **不靠猜**：agent 必须有清晰约束，动作必须先从文件状态读取，再按状态机执行。
 - **不破坏证据链**：任何改动不得让"搜索摘要/总结/报告"混入"原始资料/采录/分析"层级。
 - **保持可移植**：新能力优先落在 `.opencode/` 内，不引入外部运行依赖。
+
+---
+
+## 鸣谢
+
+本平台所用的 Skill 部分直接使用、部分深度借鉴了以下开源项目与社区成果，特此致谢：
+
+| Skill | 上游来源 |
+|---|---|
+| qmd | 直接使用 npm 开源包 `@tobilu/qmd`（本地文档搜索引擎）；检索与重排序基于 Qwen 系列开源模型（Qwen3-Embedding、Qwen3-Reranker） |
+| opendataloader-pdf | 直接使用同名开源项目（PyPI / npm / Maven 多通道分发）；混合 AI 模式基于 IBM 开源文档解析工具 Docling；布局与阅读顺序分析借鉴 XY-Cut++ 算法 |
+| 去AI味儿 | 深度借鉴 stop-slop、Humanizer-zh 等开源项目的"约束清单 + 启发式"方法论 |
+| 多源搜索 | 搜索编排参考开源元搜索引擎 SearXNG，并集成 Bing、Baidu、Google、DuckDuckGo、Tavily 等开放接口 |
+| html-report / super-slide / 快速调研师 / zhishibao | 平台自研，设计思路受开源 agent skill 生态启发；zhishibao 向量嵌入基于 Qwen3-Embedding |
+
+独立 Skill 仓库开源后将补充各 Skill 的详细依赖清单与许可证声明。
