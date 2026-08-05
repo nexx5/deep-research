@@ -219,7 +219,7 @@ opencode.json
 | 去AI味儿 | 报告/文本润色 | 随包内置，后续单独开源 |
 | opendataloader-pdf | PDF 文本提取 | 随包内置，后续单独开源 |
 
-`多源搜索` 与 `html-report` 是全局 skill 例外，安装后平台采集与 HTML 渲染能力完整，缺失时其余功能不受影响。
+`多源搜索` 与 `html-report` 是全局 skill ，请到 `https://github.com/nexx5/skills` 查看。安装后平台采集与 HTML 渲染能力完整，缺失时其余功能不受影响。
 
 ---
 
