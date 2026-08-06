@@ -9,6 +9,9 @@
 **搜索硬约束（强制）**：搜索必须通过多源搜索skill执行，禁止直接webfetch猜URL。论文搜索用学术引擎（arxiv/openalex），通用搜索用bing/searxng/baidu。搜索摘要不得作为原文，必须通过多源搜索skill的正文提取通道取全文。
 
 0. **保存原文**（强制不可跳过）
+   - **raw 必须是原文存档，不是摘要**：禁止"提炼要点""关键章节摘录"；禁止对正文做压缩、概括、改写（只允许剪裁广告/导航/页脚等噪音）
+   - **长度要求**：raw 文件长度应接近原始正文长度（通常 5-50KB，而非 0.3-2.5KB）。技术类 raw 必须保留：CLI 命令块/配置段/API 定义/架构描述/性能 benchmark 数据/实现细节（6 维度，存档后自检合格≥4）
+   - **PDF 处理**：用 PyMuPDF/pdfplumber 全文提取**逐页保存**（`===== PAGE N =====` 分页标记），不做章节筛选
    - 本地md文件：复制到 `knowledge-pack/raw/local/raw-{source_id}_{文章标题}.md`（标题中空格/冒号/斜杠等特殊字符替换为下划线）
    - URL内容：必须通过多源搜索skill的正文提取通道抓取（禁止直接webfetch猜URL），完整内容写入 `knowledge-pack/raw/web/raw-{source_id}_{文章标题}.md`（标题中空格/冒号/斜杠等特殊字符替换为下划线）
    - 同时在 `knowledge-pack/raw/url-index/url-index.jsonl` 追加一行：`{"source_id":"S{序号}","url":"原始URL","type":"local|web|pdf","saved_at":"ISO时间","raw_path":"相对路径"}`
@@ -36,6 +39,13 @@
    - 数据：\d+%|\d+倍|SOTA|benchmark|实测
    - 方法：方法|算法|框架|架构|范式
    - 人物：作者|团队|实验室|大学
+
+   **D1 引用追溯（强制，不可跳过）**：除关键词正则外，必须执行引用追溯——
+   - 扫描 raw 中的外部引用（规范/标准/论文/URL：arXiv/GitHub/官网/原文出处/档案编号）
+   - 被引用但未采录的 → 生成 discovered_lead（trigger_type="引用追溯"，target_type=规范|论文|仓库|URL，priority≥P2）
+   - **规范族成员互相引用时，未采录的必须生成线索**（如 ZSM 009-x 引用 ZSM 002 Reference Architecture，必须追溯）
+   - **二手来源中的官方仓库/一手文档链接必须追溯为独立来源**——不得只采二手转述
+   - 不可访问的引用 → 标记"引用不可及"（不生成任务）
 
 6. 输出文件（写入knowledge-pack/evidence/目录）
    - 采录-S{source_id}.md（含frontmatter+摘要+key_claims+characteristics+possible_relations+discovered_leads）

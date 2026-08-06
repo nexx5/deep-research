@@ -146,7 +146,7 @@ continuous模式下，orchestrator调用调研员后，调研员自主循环（�
 
 ```
 1. 状态检查 -> next_stage=DISCOVER/EXTRACT/SYNTHESIZE
-2. 调用调研员（批次执行：DISCOVER->EXTRACT->SYNTHESIZE->写文件->线索发掘）
+2. 调用调研员（只支持知识包模式：必须 MapReduce 派发采录员、禁止直采，见「派发调研员时的强制要求」；项目无 knowledge-pack/ → 返回 INVALID_PROJECT 由项目管理员修复）
 3. 调研员返回批次完成
 4. 检查批次计数：
    ├── 每5批次 或 断言≥200 -> 调用知识管理员（合并+consolidation）
@@ -167,6 +167,16 @@ continuous模式下，orchestrator调用调研员后，调研员自主循环（�
 | 知识管理员返回continue但无新任务 | 停止并报告异常                  |
 
 **禁止**：队列空就停、线索只记录不行动化。
+
+## 派发调研员时的强制要求（P0，V1/V2 分叉根因修复）
+
+> 根因教训（2026-08-06 实证）：新协议项目（knowledge-pack/ 存在）若调研员自己直采（搜索→抓取→写 raw→采录→分析），会丢失"raw 原文完整性"与"D1 引用追溯"能力——它们只存在于采录员系统提示/02-采集.md 中，调研员直采时不会生效。调研员曾因 task prompt 写成"执行流程 DISCOVER→EXTRACT→SYNTHESIZE"而误解为自己直采，导致产出断崖（raw 缩水 7.7x、P1 线索 0 条）。
+
+orchestrator 调用调研员 subagent 时，task prompt 必须包含以下内容（**执行细节不在本文件重复，见调研员 AGENTS.md「采集/采录执行强制规则」与「采录员 task prompt 必备要素」**）：
+
+1. **模式强制声明（P0）**：明确"本项目是新协议项目（knowledge-pack/ 存在）→ **必须使用 MapReduce 模式**：采集+采录必须派发采录员 subagent 执行（搜索→抓取→raw→采录→分析），**调研员自己是调度器，禁止自己直采替代采录员**"
+2. **禁止"流程导向"表述（P0）**：不要在 task prompt 中写"执行流程 DISCOVER→EXTRACT→SYNTHESIZE 由你执行"这类会被理解为调研员直采的措辞；改为任务导向（"派发采录员完成以下任务：..."）
+3. **引用执行细节**：明确"并发数、task prompt 必备要素九项、验收标准见调研员 AGENTS.md「采集/采录执行强制规则」与「采录员 task prompt 必备要素」"
 
 ## 状态检查
 

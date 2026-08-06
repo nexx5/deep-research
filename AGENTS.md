@@ -93,7 +93,7 @@
 |-------|------|------|
 | research-orchestrator | `.opencode/agents/research-orchestrator.md` | 默认入口、路由、状态机、闸门、批次调度 |
 | 项目管理员 | `.opencode/agents/项目管理员/AGENTS.md` | 骨架创建/修复+前置准备+PLAN_REVIEW |
-| 调研员 | `.opencode/agents/调研员/AGENTS.md` | 采集+分析+合成提炼（DISCOVER→EXTRACT→SYNTHESIZE） |
+| 调研员 | `.opencode/agents/调研员/AGENTS.md` | 调度器：强制 MapReduce 派发采录员（采集+采录+单源分析由采录员执行），禁止直采；跨源对比+质量闸门 |
 | 知识管理员 | `.opencode/agents/知识管理员/AGENTS.md` | 知识体系维护（consolidation run） |
 | 报告 | `.opencode/agents/报告/AGENTS.md` | 读取L0视图+SQLite，按 preset 组装 Markdown → 调 html-report |
 | 分析员 | `.opencode/agents/分析/AGENTS.md` | AgenticRAG检索+问答/设计/方案 |
@@ -293,11 +293,13 @@ error 项不满足时只能输出证据链缺口，禁止写报告；warning/inf
 
 ## 调研员子阶段
 
-定义在 `.opencode/agents/调研员/02-` ~ `04-` 文件中（01-前置准备已移至项目管理员，05/06职责已移交知识管理员）：
+> V0.2.2 起：原批次模式（旧协议）已取消，平台只支持知识包模式（新协议项目，必须有 `knowledge-pack/` 目录）。`02-采集.md` / `03-分析提取.md` / `04-质量闸门.md` 已废弃（仅历史参考，见各文件头废弃声明），不再作为调研员子阶段文件被调度。
 
-1. 采集 → 搜索 + 抓取 + 取证（02-采集.md）
-2. 分析提取 → 单源分析 + 跨源对比（03-分析提取.md）
-3. 质量闸门 → 追溯 + 检查 + 终验（04-质量闸门.md）
+调研员采用 **MapReduce 模式（强制）**：
+
+1. 采集 + 采录 + 单源分析 → 必须派发采录员 subagent（并发 4~12，默认 6；禁止调研员直采，见调研员 AGENTS.md「采集/采录执行强制规则」）
+2. 跨源对比（C*）+ 质量闸门 → 调研员在批次内直接执行
+3. 项目目录无 `knowledge-pack/` → 停止，返回 INVALID_PROJECT，由项目管理员按新协议重建骨架
 
 知识体系维护（索引/冲突检测/视图/饱和判定）由知识管理员负责，定义在 `.opencode/agents/知识管理员/AGENTS.md`。
 

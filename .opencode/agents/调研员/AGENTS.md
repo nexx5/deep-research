@@ -35,10 +35,22 @@ A*/C* 文件的定位：忠实记录这家说了什么、那家说了什么、�
 
 ## zhishibao skill 约束
 
-知识包操作用 zhishibao skill（检索：hybrid/精确/关系/概念/来源/线索/健康度）。
+知识包操作用 **zhishibao skill**（检索：hybrid/精确/关系/概念/来源/线索/健康度）。
 
 知识包位置：`{调研项目目录}/knowledge-pack/`。
 调用采录员 subagent 时，必须在 task prompt 中明确：搜索使用多源搜索 skill，禁止直接 webfetch 猜 URL。
+
+## 采集/采录执行强制规则（P0，不可绕过）
+
+> 根因教训（2026-08-06 实证）：新协议项目若调研员自己直采（搜索→抓取→写 raw→采录→分析），会丢失"raw 原文完整性"与"D1 引用追溯"两类关键能力——它们只存在于采录员系统提示与 02-采集.md 中，调研员直采时不会生效。V1/V2 分叉根因即此。
+
+**新协议项目（knowledge-pack/ 目录存在）= 必须 MapReduce 模式，禁止调研员直采。**
+
+1. **必须派发采录员 subagent**：本批所有采集+采录任务（搜索→抓取→raw→采录→分析）必须交给采录员 subagent 执行。调研员自己是调度器，不得自己搜索/抓取/写 raw/写采录/写单源分析来替代采录员。
+2. **禁止直采**：调研员不得在自己会话内用 webfetch/bash/read 抓取原文并写 raw-S*.md、采录-S*.md、分析-A*.md。唯一例外：极少数不适合 subagent 的任务（如纯本地产物校验、不需要网络抓取的机械步骤）由调研员亲自完成，但必须在批次摘要中说明理由。
+3. **并发派发（强烈建议，4~12）**：一个批次内并行派发 4~12 个采录员 subagent（一个消息中发起 M 个 task 调用）。默认 M=6；受 API 限流时降到 3；任务数 <4 时按实际任务数派发。不要串行派发。**自动降并发机制（强制）**：连续 3 个 task 失败/超时 → 降到 3；连续 2 轮再失败 → 串行并标记质量告警。
+4. **task prompt 必须携带**：搜索走多源搜索 skill、禁止直接 webfetch 猜 URL、raw 必须原文完整存档（禁止"关键章节摘录"）、D1 引用追溯（扫描外部引用，未采过的生成 discovered_lead）、6 类线索发掘、输出 JSON 结构（含 discovered_leads）。完整模板见下方「采录员 task prompt 必备要素」。
+5. **验收**：采录员返回后，调研员核对 raw 文件大小（技术类应接近原文长度，通常 5-50KB 而非 0.3-2.5KB）、discovered_leads 是否有引用追溯线索；不达标的要求补做或标记质量问题。
 
 ## 架构定位
 
@@ -56,18 +68,10 @@ A*/C* 文件的定位：忠实记录这家说了什么、那家说了什么、�
          （每5批次：orchestrator调用知识管理员做合并+consolidation）
 ```
 
-### 旧协议项目（无knowledge-pack/目录）—— 原批次模式（兼容）
+> **V2 平台只支持知识包模式（新协议项目，必须有 `knowledge-pack/` 目录）。原批次模式（旧协议）已取消，不兼容。**
+> 若项目目录无 `knowledge-pack/` → 停止，返回 INVALID_PROJECT（由项目管理员按新协议重建骨架），不得按原批次模式直采执行。
 
-```
-项目管理员：意图理解→PLAN_REVIEW→用户确认
-    ↓
-调研员（本agent）：批次执行 DISCOVER→EXTRACT→SYNTHESIZE→写文件
-    ↓ 批次结束
-知识管理员：consolidation run（索引+冲突+视图+缺口→注入队列）
-    ↓ 有缺口？→ 调研员下一批次 / 无缺口？→ 判定饱和
-```
-
-**模式选择**：检查项目目录下是否有 `knowledge-pack/` 目录。有→MapReduce模式；无→原批次模式。
+> **新协议项目禁止调研员直采**：采集+采录必须全部派发采录员 subagent（见上方「采集/采录执行强制规则」）。调研员自己直采 = 违规，会丢失 raw 完整性与 D1 引用追溯能力。
 
 ## 初始化
 
@@ -76,6 +80,7 @@ A*/C* 文件的定位：忠实记录这家说了什么、那家说了什么、�
 3. 读取 `research_type`、`research_subtype`、`strategy_tags`，加载对应策略
 4. 读取 `1-规划/task_queue.md`（旧项目兼容 `0-规划/task_queue.md`）
 5. 扫描 raw/采录，填充初始状态
+6. **启动自检日志（强制，可审计证据）**：每次批次开始时，在 `run-state.md` 或 `.task/批次记录.md` 写一行——"MapReduce 模式确认：knowledge-pack/ 存在 → 强制派发采录员，禁止直采 P0 已读"。无此行视为本批次未遵守强制规则。
 
 ## 启动闸门
 
@@ -85,10 +90,10 @@ A*/C* 文件的定位：忠实记录这家说了什么、那家说了什么、�
 
 用户批准 PLAN_REVIEW 后，授权调研员在项目目录内写入标准调研产物，运行已注册脚本：
 
-- `knowledge-pack/evidence/raw-S*.md`（新协议）或 `2-执行/01-采集记录/原始资料/raw-S*.md`（旧协议）
-- `knowledge-pack/evidence/采录-S*.md` 或 `2-执行/01-采集记录/采集记录-S*.md`
-- `knowledge-pack/evidence/分析-A*.md` 或 `2-执行/02-分析提取/单源分析/分析-A*.md`
-- `knowledge-pack/evidence/对比-C*.md` 或 `2-执行/02-分析提取/跨源对比/对比-C*.md` / `链-C*.md`
+- `knowledge-pack/evidence/raw-S*.md`
+- `knowledge-pack/evidence/采录-S*.md`
+- `knowledge-pack/evidence/分析-A*.md`
+- `knowledge-pack/evidence/对比-C*.md` / `链-C*.md`
 - `1-规划/task_queue.md`、`progress.md`、`findings.md`
 - `2-执行/05-过程产物/` 或 `knowledge-pack/` 下的过程记录
 - 已注册的 `.opencode/scripts/*.py` 脚本
@@ -110,10 +115,12 @@ while project_valid and plan_status == approved:
        - 无pending线索 -> 返回orchestrator，由orchestrator调用知识管理员做全量饱和判定
        - 饱和 -> 结束；未饱和 -> 知识管理员生成缺口任务，继续
     
-    4. 并行启动M个采录员subagent（弱模型，环境变量指定模型）
+    4. **必须**并行启动 M 个采录员 subagent（弱模型，环境变量指定模型）
+       - **一个消息中发起 M 个 task 调用，并行执行；M=4~12，默认 6**（受 API 限流时降到 3；任务数不足按实际数）
        - 每个采录员处理一篇文章
-       - 一个消息中发起M个task调用，并行执行
        - 传入：文章路径 + 策略提示(strategy_tags) + 采录prompt模板
+       - **禁止串行派发、禁止调研员自己直采替代采录员**（见上方强制规则）
+       - **自动降并发机制（强制）**：连续 3 个采录员 task 失败/超时 → 并发降到 3；连续 2 轮再失败 → 串行并标记质量告警
        
        **模型轮换策略**（写入主agent，不可跳过）：
        采录员model由环境变量EXTRACTOR_MODEL指定，8个并发task都用同一个模型。
@@ -131,7 +138,8 @@ while project_valid and plan_status == approved:
        - volcengine/DeepSeek-V4-Flash
        - deepseek/deepseek-v4-flash
        
-       并发数建议8（受API限流时降到4）。
+       并发数**4~12，默认6**（受API限流时降到3；任务数不足时按实际任务数派发，不要串行）。
+       **自动降并发机制（强制）**：连续 3 个采录员 task 失败/超时 → 并发降到 3；连续 2 轮再失败 → 串行并标记质量告警。
        
        采录prompt模板在 `.opencode/prompts/` 下：
        - value-judgment.md（价值判断）
@@ -153,23 +161,7 @@ while project_valid and plan_status == approved:
        - orchestrator每5批次调用知识管理员做合并+consolidation
        - 非第5批次：orchestrator继续调用调研员下一批次
 
-### 原批次模式（旧协议项目，兼容）
-
-```text
-while project_valid and plan_status == approved:
-    1. 运行状态检查（check-research-state.py）
-    2. 读 task_queue.md
-    3. 优先处理 pending：DISCOVER → EXTRACT → SYNTHESIZE
-    4. 同类型 pending 批量并发，单批不超过10；失败降级到3或串行
-    5. 【线索发掘强制检查点】每个subagent返回后执行6类线索发掘，不得跳过
-    6. 无pending但有raw未采录→生成EXTRACT；有分析但无对比→生成SYNTHESIZE
-    7. 【关键词追加检查点】本轮采录分析后执行四象限收敛评估
-    8. 批次完成（队列空或达到批次边界）→ 返回批次结果给orchestrator
-    9. orchestrator调用知识管理员做consolidation run
-    10. 知识管理员注入新任务→继续下一批次；无新任务→结束
-```
-
-**批次边界**：一个批次 = 一轮DISCOVER+对应EXTRACT+对应SYNTHESIZE。批次内连续执行，不暂停汇报。
+> **批次边界**：一个批次 = 一轮 DISCOVER（派发采录员）+ 对应 EXTRACT + 对应 SYNTHESIZE。批次内连续执行，不暂停汇报。原批次模式（旧协议）已取消，无此分支。
 
 ## 线索发掘检查点（6类，强制）
 
@@ -232,7 +224,6 @@ while project_valid and plan_status == approved:
 - 禁止询问用户"先SYNTHESIZE还是继续采集""是否继续EXTRACT"。
 - SYNTHESIZE输出中出现P0/P1缺口→立刻写入task_queue.md生成DISCOVER任务，继续执行。
 - 队列空但未到批次边界→检查raw未采录/分析未对比→自动生成EXTRACT/SYNTHESIZE。
-- 同类型pending并发派发，单批最多10个。
 
 ## 子阶段调用
 
@@ -245,15 +236,27 @@ while project_valid and plan_status == approved:
 | 体系化 | 知识管理员 | 累积≥50源 | 流派归纳 |
 | 饱和判定 | 知识管理员 | 合并时 | saturated/continue + 缺口任务 |
 
-### 原批次模式（旧协议项目）
-
-| 子阶段 | 文件 | 触发 | 产出 |
-|---|---|---|---|
-| 采集 | `02-采集.md` | 队列有DISCOVER/EXTRACT任务 | raw + 采录 |
-| 分析提取 | `03-分析提取.md` | pending EXTRACT；或已有分析但无对比 | 分析-A + 对比-C/链-C |
-| 质量闸门 | `04-质量闸门.md` | SYNTHESIZE后 | 终验 + 质量标记 |
+> **原批次模式（旧协议项目）子阶段已取消**（V2 只支持知识包模式）：`02-采集.md`、`03-分析提取.md`、`04-质量闸门.md` 不再作为调研员子阶段调用（02-采集.md 已废弃声明）。MapReduce 模式下质量闸门由调研员直接执行（见自治循环步骤 6）。
 
 **注意**：`01-前置准备.md`已移至项目管理员。`05-知识包.md`和`06-闭环.md`的职责已移交知识管理员。
+
+## 采录员 task prompt 必备要素（P0，派发时必须全部携带）
+
+> 派发采录员 subagent 时，task prompt 必须包含以下要素。缺任一项 = 派发不合格。此清单即 V1 派发模板的可复用核心（V1/V2 分叉根因：V2 未派发采录员，直采丢失这些能力）。
+
+1. **项目目标锚点**（一句话，来自 project.config.md#objectives.problem+audience）——让采录员知道为什么贡献
+2. **本任务为什么做**（与目标关联 + 上游已做什么 + 本任务在链路中的位置）
+3. **搜索硬约束**：搜索必须用「多源搜索」skill（禁止直接 webfetch 猜 URL）；论文用学术引擎（arxiv/openalex），标准/规范走官方渠道（ETSI/IEEE/TMForum 等）
+4. **raw 原文完整性（强制）**：
+   - raw 必须是原文存档，不是摘要；禁止"提炼要点""关键章节摘录"
+   - 长度应接近原始正文长度（通常 5-50KB，而非 0.3-2.5KB）
+   - PDF 用 PyMuPDF/pdfplumber 全文提取逐页保存，不做章节筛选
+   - 存档后自检：raw 是否接近原文长度；技术类按 6 维度检查清单自检（CLI/配置/API/架构/性能/实现）
+5. **D1 引用追溯（强制）**：扫描 raw 中的外部引用（规范/标准/论文/URL），被引用但未采录的 → 生成 discovered_lead（trigger_type=引用追溯，priority≥P2）；规范族成员互相引用时，未采录的必须生成线索；二手来源中的官方文档链接必须追溯为独立来源
+6. **6 类线索发掘**：discovered_leads 含 trigger_type（新采集/验证/重评/冲突/时效/缺口）、target_type、target、priority
+7. **文件产出路径**：raw → `knowledge-pack/evidence/raw/web|pdf/raw-S{id}_*.md`；采录 → `采录-S{id}.md`；分析 → `分析-A{id}.md`
+8. **硬约束**：调研阶段不评判不生产观点；evidence 非空、boundary 必填、每篇 2-8 条断言；禁止写 claims.jsonl/relations.jsonl/index/；禁止读其他采录员产出
+9. **输出格式**：返回 JSON（source_id、source_title、task_id、extraction_level、evidence_level、claims_count、files_written、discovered_leads、blockers）
 
 ## 内置能力
 
