@@ -4,6 +4,12 @@
 > 默认执行入口由 `opencode.json` 的 `default_agent: research-orchestrator` 强制指定。
 > 业务逻辑在 `.opencode/agents/` 下各 agent 中定义。
 
+## 术语
+
+- **调研平台**（平台）：本运行包（AGENTS.md + opencode.json + .opencode/），即 agent 系统本身。
+- **调研项目**（项目）：针对某调研目标的具体工作目录（含 knowledge-pack、raw、采录、分析、project.config.md）。"项目"专指调研项目，平台不叫项目。
+- **路径规则**：平台脚本走平台路径 `.opencode/scripts/`；调研项目数据走 `{调研项目目录}/`；两者不拼接。
+
 ## 可移植运行包边界
 
 本平台运行包只由以下三部分组成：
@@ -112,11 +118,10 @@
 所有 agent 在调用 `.opencode/scripts/` 下的脚本时，必须遵守：
 
 1. **直接用完整路径运行**：`python .opencode/scripts/脚本名.py --project-path "..."`。路径已明确给出，不需要确认文件是否存在。
-2. **禁止用 glob/grep 搜索脚本文件名**：`.opencode/scripts/` 是平台级目录，不在项目目录内，glob 搜不到。不要用 `glob("**/knowledge-search.py")` 之类的搜索——搜不到不代表脚本不存在，只代表你在错误的目录下搜。
+2. **禁止用 glob/grep 搜索脚本文件名**：`.opencode/scripts/` 是平台级目录，不在项目目录内，glob 搜不到。不要用 `glob("**/check-research-state.py")` 之类的搜索——搜不到不代表脚本不存在，只代表你在错误的目录下搜。
 3. **禁止因"找不到脚本"而绕过脚本自己写 SQL**：脚本存在且可用。如果运行报错，读报错信息排查（路径、编码、schema）；不要回退到直接操作 SQLite。
 4. **禁止用 Read 工具打开脚本源码来"理解实现"**：脚本的接口（命令行参数+输出格式）在 agent 文件中已完整描述。按描述使用即可，不需要读源码。
-5. **zhishibao skill 脚本例外**：zhishibao 知识包相关脚本（`knowledge-search.py` / `generate-knowledge-views.py` / `build-relations.py` / `embed-claims.py`）已统一到 `.opencode/skills/zhishibao/scripts/`，**不在 `.opencode/scripts/`**。调用时用 `python .opencode/skills/zhishibao/scripts/脚本名.py --project-path "..."`。其余平台脚本（check-research-state / merge-batch / checkpoint 等）仍在 `.opencode/scripts/`。
-6. **PowerShell 调脚本传 JSON 规范**：见全局 `~/.config/opencode/AGENTS.md` "PowerShell 调脚本传 JSON 规范"段。要点：含中文/嵌套 JSON 参数优先用 `--xxx-file 临时文件`，避免内联 `--xxx '{...}'` 被 PowerShell argparse 截断；必须内联用单引号+反引号转义双引号；中文 JSON 文件 UTF-8 无 BOM；终端乱码运行 `chcp 65001`。
+5. **PowerShell 调脚本传 JSON 规范**：见全局 `~/.config/opencode/AGENTS.md` "PowerShell 调脚本传 JSON 规范"段。要点：含中文/嵌套 JSON 参数优先用 `--xxx-file 临时文件`，避免内联 `--xxx '{...}'` 被 PowerShell argparse 截断；必须内联用单引号+反引号转义双引号；中文 JSON 文件 UTF-8 无 BOM；终端乱码运行 `chcp 65001`。
 
 ## 面向人类表述规范（全局硬约束）
 

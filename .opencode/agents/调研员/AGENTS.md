@@ -35,9 +35,9 @@ A*/C* 文件的定位：忠实记录这家说了什么、那家说了什么、�
 
 ## zhishibao skill 约束
 
-知识包操作必须通过 **zhishibao skill** 执行。**zhishibao skill 的标准调用方式就是 `python .opencode/skills/zhishibao/scripts/<脚本名>.py --project-path "..."`（见 SKILL.md"脚本位置"段，调用脚本即等价于使用 skill，不是绕过 skill）**。当前 skill 不内嵌 LLM，所有语义判断由 AI 完成，脚本只执行写入/索引/嵌入/检索动作。
+知识包操作必须通过 **zhishibao skill** 执行。**zhishibao skill 的标准调用方式见 SKILL.md"脚本位置"段（调用脚本即等价于使用 skill，不是绕过 skill）**。当前 skill 不内嵌 LLM，所有语义判断由 AI 完成，脚本只执行写入/索引/嵌入/检索动作。
 
-**"绕过 skill"的真实定义**（这才是禁止的）：自己用 sqlite3 写 SQL 查询 SQLite、自己用 glob+grep+Read 遍历 claims.jsonl/relations.jsonl 等数据文件替代 skill 的检索/写入接口、自己手写 claims.jsonl 不走 ingest 校验。**通过 skill 提供的脚本调用不在禁止之列**。
+**"绕过 skill"的真实定义**（这才是禁止的）：自己用 sqlite3 写 SQL 查询 SQLite、自己用 glob+grep+Read 遍历 claims.jsonl/relations.jsonl 等数据文件替代 skill 的检索/写入接口、自己手写 claims.jsonl 不走 ingest 校验、自写临时 .py 包装脚本调用 skill 脚本（擅自决定用哪个脚本）。**通过 skill 提供的标准脚本调用不在禁止之列**。
 
 知识包位置：`{调研项目目录}/knowledge-pack/`。
 调用采录员 subagent 时，必须在 task prompt 中明确：搜索使用多源搜索 skill，禁止直接 webfetch 猜 URL。

@@ -180,7 +180,7 @@ permission:
 ### Step 6：写检查点与日志
 
 ```bash
-python {调研项目目录}/.opencode/scripts/checkpoint.py --project-path "{调研项目目录}" --save --phase consolidation --sources-done <数> --sources-remaining <数> --lead-pool '{"P0":N,"P1":N}'
+python .opencode/scripts/checkpoint.py --project-path "{调研项目目录}" --save --phase consolidation --sources-done <数> --sources-remaining <数> --lead-pool '{"P0":N,"P1":N}'
 ```
 
 写入 `{调研项目目录}/2-执行/05-过程产物/consolidation-log-{时间戳}.md`：

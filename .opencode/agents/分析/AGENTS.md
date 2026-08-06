@@ -32,7 +32,7 @@ permission:
 
 ## 检索方式
 
-**使用 zhishibao skill 检索知识包**。skill 的标准调用方式是 `python .opencode/skills/zhishibao/scripts/knowledge-search.py --project-path "..." --action ...`（见 SKILL.md"脚本位置"段，调用脚本即等价于使用 skill）。**禁止绕过 skill**：不要自己写 SQL 查询 SQLite、不要用 glob+grep+Read 遍历 claims.jsonl/relations.jsonl 等数据文件来替代 skill 的检索接口。
+**使用 zhishibao skill 检索知识包**。skill 的标准调用方式见 SKILL.md"脚本位置"段（调用脚本即等价于使用 skill）。**禁止绕过 skill**：不要自己写 SQL 查询 SQLite、不要用 glob+grep+Read 遍历 claims.jsonl/relations.jsonl 等数据文件来替代 skill 的检索接口、不要自写临时脚本包装调用 skill 脚本。
 
 先加载 zhishibao skill 获取使用规范，然后按以下检索工具操作：
 
