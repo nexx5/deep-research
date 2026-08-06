@@ -111,7 +111,7 @@ type_notes: 分类说明
 
 ## 创建骨架
 
-1. 从 `.opencode/模板库/` 复制全部内容到 `./<项目名>/`（工作区根目录，含 `project.config.md` 与 `run-state.md` 两个配置文件）
+1. 从 `.opencode/模板库/` 复制全部内容到 `<项目名>/`（含 `project.config.md` 与 `run-state.md` 两个配置文件）
 2. 填充 `project.config.md`（**只静态定义**：元信息+objectives四问+调研工艺+策略映射+知识包Schema+ID注册表；PLAN_REVIEW 后冻结，不写批次进度/keywords/dead_ends）
 3. 填充 `run-state.md`（**运行态**：执行参数+搜索参数+批次进度+focus_keywords+dead_ends+用户阶段性意见）
 4. 填充 `1-规划/1-任务规划.md`（"目标"段须与 `project.config.md#objectives` 四问对齐）

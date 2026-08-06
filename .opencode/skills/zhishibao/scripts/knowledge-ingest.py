@@ -5,14 +5,21 @@ zhishibao 知识写入入口 - knowledge-ingest.py
 使用：
     # 新增断言
     python knowledge-ingest.py --project-path "..." --claim '{"statement":"...","boundary":"..."}'
-    # 批量
+    # 批量（推荐：全链路只跑一次，避免逐条触发全量索引重建）
     python knowledge-ingest.py --project-path "..." --claims-file claims.json
+    # 批量 + per-claim 关系（_relation/_merge_into 为内部字段，pop 后不入库）
+    #   claims.json 形如：[{"statement":"...","_relation":"extends:CL00001"}, {"statement":"...","_merge_into":"CL00002"}]
     # AI 判断为 extend CL001
     python knowledge-ingest.py --project-path "..." --claim '{...}' --relation extends:CL001
     # AI 判断为 conflict CL001
     python knowledge-ingest.py --project-path "..." --claim '{...}' --relation opposing:CL001
     # AI 判断为 merge 进 CL001
     python knowledge-ingest.py --project-path "..." --claim '{...}' --merge-into CL001
+
+失败隔离语义：
+    - 单条校验失败（statement 非法 / _relation 格式错误 / 非法 rel_type / target 不存在）
+      -> results 内逐条 error，该条跳过，其余正常入库，整批不中断。
+    - 调用方必须解析 results[].error，失败条目修正后单独重提，禁止整批重跑（避免重复断言）。
 
 融合纪律（AI 必须遵守）：
     ingest 前必须先 knowledge-search.py --action hybrid 检索候选，判断关系后再调本脚本。
@@ -256,25 +263,30 @@ def ingest(project_path, claims_data, relation=None, merge_into=None, status_ove
 
         results = []
 
+        batch_had_relation = False
         for claim in claims_data:
+            # per-claim 关系覆盖（内部字段，pop 后不入库）
+            claim_relation = claim.pop('_relation', None) or relation
+            claim_merge_into = claim.pop('_merge_into', None) or merge_into
+
             ok, err = validate_claim(claim, require_boundary=require_boundary)
             if not ok:
                 results.append({"error": err, "claim": claim})
                 continue
 
             # --- merge-into 模式 ---
-            if merge_into:
+            if claim_merge_into:
                 new_id = next_claim_id(existing_claims)
                 claim['claim_id'] = new_id
                 claim['status'] = 'merged'
-                claim['possible_relations'] = [f"merged_to:{merge_into}"]
+                claim['possible_relations'] = [f"merged_to:{claim_merge_into}"]
                 claim['created'] = now
                 claim.setdefault('characteristics', [])
                 claim.setdefault('confidence', 0.5)
                 claim.setdefault('extraction_level', 'deep')
                 claim.setdefault('opposing', [])
                 existing_claims.append(claim)
-                results.append({"action": "merged", "new_claim_id": new_id, "merged_to": merge_into})
+                results.append({"action": "merged", "new_claim_id": new_id, "merged_to": claim_merge_into})
                 continue
 
             # --- 正常新增 ---
@@ -290,18 +302,24 @@ def ingest(project_path, claims_data, relation=None, merge_into=None, status_ove
             claim.setdefault('opposing', [])
             claim.setdefault('possible_relations', [])
 
-            # 处理 relation
-            if relation:
-                rel_type, target_id = relation.split(':', 1)
-                # A8: rel_type 白名单校验
+            # 处理 relation（per-claim _relation 或函数级 --relation）
+            if claim_relation:
+                parts = claim_relation.split(':', 1)
+                if len(parts) != 2:
+                    results.append({"error": f"_relation 格式错误: {claim_relation}", "claim": claim})
+                    continue
+                rel_type, target_id = parts
+                # A8: rel_type 白名单校验（失败隔离单条，不中断整批）
                 REL_TYPE_WHITELIST = {'extends', 'coexist', 'opposing', 'alternative_to',
                                       'complements', 'similar_to', 'depends_on', 'supersedes', 'upstream_of'}
                 if rel_type not in REL_TYPE_WHITELIST:
-                    return {"error": f"非法 rel_type: {rel_type}, 白名单: {REL_TYPE_WHITELIST}"}
-                # A8: target_id 存在性校验
+                    results.append({"error": f"非法 rel_type: {rel_type}, 白名单: {REL_TYPE_WHITELIST}", "claim": claim})
+                    continue
+                # A8: target_id 存在性校验（失败隔离单条，不中断整批）
                 target_exists = any((c.get('claim_id') or c.get('id')) == target_id for c in existing_claims)
                 if not target_exists:
-                    return {"error": f"target_id {target_id} 不存在于 claims"}
+                    results.append({"error": f"target_id {target_id} 不存在于 claims", "claim": claim})
+                    continue
                 if rel_type == 'opposing':
                     # 双方标 contested + 互加 opposing
                     claim['status'] = status_override or 'contested'
@@ -327,18 +345,19 @@ def ingest(project_path, claims_data, relation=None, merge_into=None, status_ove
                         'relation_type': rel_type, 'strength': 'strong',
                         'context': f'AI 判断 {rel_type}', 'created': now
                     })
+                batch_had_relation = True
 
             existing_claims.append(claim)
             results.append({
                 "action": "ingested",
                 "claim_id": new_id,
-                "relation": relation,
+                "relation": claim_relation,
                 "status": claim['status']
             })
 
         # 循环外统一写回（避免重复写入）
         write_jsonl(claims_path, existing_claims)
-        if relation or merge_into:
+        if batch_had_relation or relation or merge_into:
             write_jsonl(relations_path, existing_relations)
 
     finally:

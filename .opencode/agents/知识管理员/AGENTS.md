@@ -67,38 +67,57 @@ permission:
 > 每次被调用时执行以下6步，不可跳过。
 > 先加载 zhishibao skill 获取使用规范。
 
-### Step 1：断言提取+入库
+### Step 1：断言提取 + 判断 + 批量入库（过渡态：串行判断 + 批量写）
 
-扫描自上次consolidation以来新增/修改的文件：
-- `{调研项目目录}/knowledge-pack/evidence/分析-A*.md`
-- `{调研项目目录}/knowledge-pack/evidence/对比-C*.md`
-- `{调研项目目录}/knowledge-pack/evidence/采录-S*.md`
+> 判断层并发（分片/汇总/跨分片）为后续优化项，**本次不启用**。当前为"单 agent 串行判断 + 一次批量写"过渡态——已消除逐条 ingest 触发全量索引重建的重复浪费。
 
-对每个新A*/C*文件：
-1. 优先读 `## key_claims` 结构化段，提取断言
-2. 每条断言包含：statement、boundary、source（path指向A*/C*文件）、confidence、characteristics
-3. **融合纪律（必须执行）**：对每条断言，先用 zhishibao skill `--action hybrid --query "<断言关键词>"` 查候选
-4. 判断与候选的关系（new/duplicate/merge/extend/conflict）
-5. 按关系用 zhishibao skill ingest写入：
-   - new -> 直接ingest
-   - duplicate -> 跳过
-   - merge -> `--merge-into CLxxxx`
-   - extend -> `--relation extends:CLxxxx`
-   - conflict -> `--relation opposing:CLxxxx`
-6. zhishibao ingest自动触发：index更新 + 向量嵌入 + 关系构建 + 视图生成
+**写入层（核心变更）**：判断完成后**一次 `--claims-file` 批量 ingest**，全链路（索引+嵌入+关系+视图）只跑 1 次，不再逐条 ingest。
+
+流程：
+
+1. 扫描自上次consolidation以来新增/修改的文件：
+   - `{调研项目目录}/knowledge-pack/evidence/分析-A*.md`
+   - `{调研项目目录}/knowledge-pack/evidence/对比-C*.md`
+   - `{调研项目目录}/knowledge-pack/evidence/采录-S*.md`
+2. **判断层（串行，逐条）**：对每个新A*/C*文件的每条断言：
+   - 优先读 `## key_claims` 结构化段，提取断言（statement、boundary、source、confidence、characteristics）
+   - **融合纪律（必须执行，可观测）**：先用 zhishibao skill `--action hybrid --query "<断言关键词>"` 查候选
+   - 判断与候选的关系（new/duplicate/merge/extend/conflict/coexist）
+   - **判断产出必须带 `_search_evidence` 字段**（query / candidates_returned / basis 三子项）——把"先查后写"从承诺变成可验证数据
+3. **汇总层**：所有判断产出统一 JSON 数组（每条含 `_relation` / `_merge_into` / `_search_evidence`）：
+   ```json
+   [
+     {"statement":"...","boundary":"...","source":{...},"confidence":0.7,"_relation":"extends:CLxxxx","_search_evidence":{"query":"...","candidates_returned":5,"basis":"候选#2边界比对"}},
+     {"statement":"...","_merge_into":"CLxxxx","_search_evidence":{"query":"...","candidates_returned":0,"basis":"无候选，判定为 new"}}
+   ]
+   ```
+   - new -> 不带 `_relation`；duplicate -> 跳过不写入
+   - merge -> `_merge_into: CLxxxx`；extend/conflict/coexist -> `_relation: extends|opposing|coexist:CLxxxx`
+   - **opposing 也用批量 `_relation: opposing:CLxxxx` 传入（重要）**：ingest 会自动把双方标 contested、互加 opposing、写 relations.jsonl——与 extends/coexist 同机制，**不要绕过批量路径单独用 `--arbitrate` 处理本批新判定**（那会造成"关系未建、contested 假阴性"）。仲裁统一到 Step2 对已建立的 opposing 对执行
+4. **汇总硬校验（写入前）**：每条断言必须有 `_search_evidence`（三子项齐全）；`candidates_returned` 可为 0（new 关系合法），但 `basis` 必须非空且说明判定依据——**校验"查过且留痕"，不校验"查到了"**；无检索证据的断言拒绝入库
+5. **写入层（一次批量）**：
+   ```bash
+   python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claims-file claims_batch.json
+   ```
+   - ingest 自动触发：index更新 + 向量嵌入 + 关系构建 + 视图生成（全链路只跑 1 次）
+6. **失败兜底重提闭环（必须）**：批量写入后必须解析 `results[].error`：
+   - 失败条目（如 target 不存在、格式错误）**修正后单独重提**，禁止静默丢弃
+   - 只重提失败条目，**禁止整批重跑**（`next_claim_id` 基于已有最大 id，整批重跑会产生内容相同的重复断言）
 
 **断言提取规范**：
 - statement必须是简洁的一句话主张，不是完整句子
 - boundary是"在什么条件下成立"，不是结论本身
-- 一篇A*通常产出2-8条断言，不要过度提取
+- 2-8 条是典型参考区间，不是数量上限，超过 8 条不构成违规；写入门槛是质量（独立可迁移模式/价值主张 + 带 boundary），不是数量
+- 入库时不得按数量上限砍量：若 A* 已按模式/边界分簇产出多子簇断言，全部按融合纪律入库；去重只靠 hybrid 检索判定（new/duplicate/merge/extend/conflict），不靠数量裁切
 - source的path指向A*/C*文件，type标注"analysis"或"comparison"
-- 如果A*的结论是对既有断言的扩展/修正/否定，必须在ingest时用--relation参数标注
+- 如果A*的结论是对既有断言的扩展/修正/否定，必须在判断时标注 `_relation`（extend/opposing）
+- 同批互指（A→B 且 B→A 均未入库）需拆成两批分别 ingest
 
 ### Step 2：冲突复查 + 强制仲裁（每次 consolidation 必做）
 
 > 冲突仲裁是知识演化语义的核心（P0-A）。**每次 consolidation 必须对新增 opposing 对仲裁，禁止只标不裁。**
 
-1. 用 zhishibao skill `--action arbitration --status pending` 检查**未仲裁 opposing 对**
+1. 用 zhishibao skill `--action arbitration --status pending` 检查**未仲裁 opposing 对**（**含 Step1 批量 `_relation: opposing` 新建的对**——它们已自动标 contested + 写 opposing 关系，与存量对同一流程仲裁）
 2. 用 zhishibao skill `--action status --status contested` 检查contested断言
 3. 用 zhishibao skill `--action summary` 检查opposing_count
 4. 全量扫描：对同主题断言做hybrid检索交叉比对，找漏网冲突；新发现的冲突用 ingest `--relation opposing:CLxxxx` 标记

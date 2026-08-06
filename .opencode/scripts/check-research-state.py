@@ -311,16 +311,38 @@ def check_new_protocol(project_path):
     result["schools_count"] = count_jsonl("schools.jsonl")
     result["leads_count"] = count_jsonl("source-leads.jsonl")
 
-    # 检查evidence文件
-    evidence_path = os.path.join(pack_path, "evidence")
-    if os.path.isdir(evidence_path):
-        result["raw_count"] = len([f for f in os.listdir(evidence_path) if f.startswith("raw-S")])
-        result["extract_count"] = len([f for f in os.listdir(evidence_path) if f.startswith("采录-S")])
-        result["analysis_count"] = len([f for f in os.listdir(evidence_path) if f.startswith("分析-A")])
-    else:
-        result["raw_count"] = 0
-        result["extract_count"] = 0
-        result["analysis_count"] = 0
+    # 检查证据文件（聚合扫描 evidence/ 顶层 + raw/{local,web,pdf}/ 子目录，按来源编号去重）
+    # 新布局：raw-S* 存放于 knowledge-pack/raw/local|web|pdf/；evidence/ 顶层为旧布局/采录分析散落点
+    # 按编号去重而非文件名：同一来源 S#### 可能存在 raw-S0500.md / raw-S0500_标题.md / .pdf 多种变体
+    scan_dirs = [
+        os.path.join(pack_path, "evidence"),
+        os.path.join(pack_path, "raw", "local"),
+        os.path.join(pack_path, "raw", "web"),
+        os.path.join(pack_path, "raw", "pdf"),
+    ]
+    raw_ids = set()
+    extract_ids = set()
+    analysis_ids = set()
+    for _d in scan_dirs:
+        if not os.path.isdir(_d):
+            continue
+        for _f in os.listdir(_d):
+            if not os.path.isfile(os.path.join(_d, _f)):
+                continue
+            _m = re.match(r'raw-S(\d+)', _f)
+            if _m:
+                raw_ids.add(_m.group(1))
+                continue
+            _m = re.match(r'采录-S(\d+)', _f)
+            if _m:
+                extract_ids.add(_m.group(1))
+                continue
+            _m = re.match(r'分析-A(\d+)', _f)
+            if _m:
+                analysis_ids.add(_m.group(1))
+    result["raw_count"] = len(raw_ids)
+    result["extract_count"] = len(extract_ids)
+    result["analysis_count"] = len(analysis_ids)
 
     # 检查索引
     db_path = os.path.join(pack_path, "index", "knowledge.db")

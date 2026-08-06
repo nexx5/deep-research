@@ -152,7 +152,16 @@ EMBED_MODEL=qwen3-embed
 python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." \
   --claim '{"statement":"...","boundary":"...","source":{...},"confidence":0.7,"characteristics":["..."]}'
 
-# 批量写入
+# 批量写入（推荐：全链路只跑一次，避免逐条触发全量索引重建）
+python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claims-file claims.json
+
+# 批量 + per-claim 关系（_relation/_merge_into 为内部字段，pop 后不入库；仅批量模式使用）
+# claims.json 形如：
+#   [
+#     {"statement":"...","_relation":"extends:CL00001"},
+#     {"statement":"...","_relation":"opposing:CL00002"},
+#     {"statement":"...","_merge_into":"CL00003"}
+#   ]
 python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claims-file claims.json
 
 # extend CL00001
@@ -164,6 +173,13 @@ python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claim 
 # merge 进 CL00001（新断言 status=merged，不参与 active 检索）
 python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claim '{...}' --merge-into CL00001
 ```
+
+**per-claim 关系规则（强制）**：
+- `_relation` / `_merge_into` 是**内部字段**，ingest 时 pop 掉，不写入 claims.jsonl 真相源。
+- **两者互斥**：同一条断言同时指定时以 `_merge_into` 为准（merge 分支先判断），调用方应避免同时指定。
+- **同批互指**：per-claim 关系只能指向"已入库断言或本批靠前的断言"；同批互指（A→B 且 B→A 均未入库）会报 error，需拆成两批分别 ingest。
+- **失败隔离**：单条校验失败（statement 非法 / `_relation` 格式错误 / 非法 rel_type / target 不存在）→ results 内逐条 error，该条跳过，其余正常入库，**整批不中断**。
+- **禁止整批重跑**：写入后必须解析 `results[].error`，失败条目修正后**单独重提**（避免 `next_claim_id` 基于已有最大 id 导致内容相同断言重复入库）。
 
 ingest 自动执行全链路：写 jsonl -> 更新 SQLite 索引 -> 向量嵌入 -> 构建/加载关系 -> 生成知识地图。
 
