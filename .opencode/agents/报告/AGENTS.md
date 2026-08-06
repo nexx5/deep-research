@@ -49,13 +49,12 @@ permission:
 
 ### 检索纪律
 
-1. **检索走 zhishibao skill，深读走 Read**：不要用 glob+grep+Read 遍历数据文件替代检索
-2. **不要直接写 SQL 查询 SQLite**：用 zhishibao skill 替代
-3. **Read 数据文件的正确场景**：zhishibao skill 返回断言ID和source ID后，需要深读该来源完整证据时
-4. **不能只用hybrid**：必须配合relations/concept/source形成完整检索链，每轮至少用3种action
-5. **深读必须读采录原文**：断言级信息是压缩的，证据细节在采录文件里
-6. **来源区分必须诚实**：hybrid检索结果、schools.jsonl直接读取等必须分别标注，不能混称"检索结果"
-7. **检索输出不原样粘贴**：zhishibao skill 检索结果中的 CL/S 字段只用于定位与溯源，不得把检索输出的原始文本原样粘贴进报告正文；引用一律转为业务性表述（来源标题/URL）
+1. **检索走 zhishibao skill，深读走 Read**
+2. **Read 数据文件的正确场景**：zhishibao skill 返回断言ID和source ID后，需要深读该来源完整证据时
+3. **不能只用hybrid**：必须配合relations/concept/source形成完整检索链，每轮至少用3种action
+4. **深读必须读采录原文**：断言级信息是压缩的，证据细节在采录文件里
+5. **来源区分必须诚实**：hybrid检索结果、schools.jsonl直接读取等必须分别标注，不能混称"检索结果"
+6. **检索输出不原样粘贴**：zhishibao skill 检索结果中的 CL/S 字段只用于定位与溯源，不得把检索输出的原始文本原样粘贴进报告正文；引用一律转为业务性表述（来源标题/URL）
 
 ## 证据引用规则（按档位适用）
 

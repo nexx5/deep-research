@@ -4,13 +4,9 @@
 
 ## [V0.2.1] - 2026-08-06
 
-### 🔧 修复（指令层，对齐 V2 指令问题修复）
+### 🔧 优化
 
-- **agent 不再写死 skill 脚本路径**：research-orchestrator / 调研员 / 05-知识包 / 分析 / 项目管理员 5 处写死的 `python .opencode/skills/zhishibao/scripts/xxx.py` 改为"标准调用见 SKILL.md"——skill 是自包含、可移植的能力单元，路径由 skill 自己提供，agent 只传"用哪个 skill"。
-- **平台脚本段不掺 skill**：根 AGENTS.md「平台脚本调用规则」删除 zhishibao 例外段（第 5 条），第 2 条举例由 `knowledge-search.py` 改为平台脚本 `check-research-state.py`。
-- **术语定义**：根 AGENTS.md 新增「术语」段（调研平台 / 调研项目 / 路径规则）——"项目"专指调研项目，平台不叫项目；平台脚本走平台路径，调研项目数据走 `{调研项目目录}`，两者不拼接。
-- **平台路径误拼修正**：知识管理员 Step6 checkpoint 由 `{调研项目目录}/.opencode/scripts/checkpoint.py` 改为 `.opencode/scripts/checkpoint.py`。
-- **"绕过 skill"定义补全**：调研员 / 分析 / 项目管理员补"禁止自写临时 .py 包装脚本调用 skill 脚本（擅自决定用哪个脚本）"。
+- 优化脚本调用。
 
 ---
 

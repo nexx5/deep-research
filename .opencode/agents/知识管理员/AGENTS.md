@@ -95,11 +95,7 @@ permission:
    - merge -> `_merge_into: CLxxxx`；extend/conflict/coexist -> `_relation: extends|opposing|coexist:CLxxxx`
    - **opposing 也用批量 `_relation: opposing:CLxxxx` 传入（重要）**：ingest 会自动把双方标 contested、互加 opposing、写 relations.jsonl——与 extends/coexist 同机制，**不要绕过批量路径单独用 `--arbitrate` 处理本批新判定**（那会造成"关系未建、contested 假阴性"）。仲裁统一到 Step2 对已建立的 opposing 对执行
 4. **汇总硬校验（写入前）**：每条断言必须有 `_search_evidence`（三子项齐全）；`candidates_returned` 可为 0（new 关系合法），但 `basis` 必须非空且说明判定依据——**校验"查过且留痕"，不校验"查到了"**；无检索证据的断言拒绝入库
-5. **写入层（一次批量）**：
-   ```bash
-   python "<skill目录>/scripts/knowledge-ingest.py" --project-path "..." --claims-file claims_batch.json
-   ```
-   - ingest 自动触发：index更新 + 向量嵌入 + 关系构建 + 视图生成（全链路只跑 1 次）
+5. **写入层（一次批量）**：用 zhishibao skill 批量 ingest（--claims-file claims_batch.json），自动触发 index更新 + 向量嵌入 + 关系构建 + 视图生成（全链路只跑 1 次）
 6. **失败兜底重提闭环（必须）**：批量写入后必须解析 `results[].error`：
    - 失败条目（如 target 不存在、格式错误）**修正后单独重提**，禁止静默丢弃
    - 只重提失败条目，**禁止整批重跑**（`next_claim_id` 基于已有最大 id，整批重跑会产生内容相同的重复断言）

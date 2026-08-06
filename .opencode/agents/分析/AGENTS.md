@@ -32,7 +32,7 @@ permission:
 
 ## 检索方式
 
-**使用 zhishibao skill 检索知识包**。skill 的标准调用方式见 SKILL.md"脚本位置"段（调用脚本即等价于使用 skill）。**禁止绕过 skill**：不要自己写 SQL 查询 SQLite、不要用 glob+grep+Read 遍历 claims.jsonl/relations.jsonl 等数据文件来替代 skill 的检索接口、不要自写临时脚本包装调用 skill 脚本。
+用 zhishibao skill 检索断言（hybrid/精确/关系/概念/来源/线索/健康度）。
 
 先加载 zhishibao skill 获取使用规范，然后按以下检索工具操作：
 
@@ -92,12 +92,11 @@ Level 5: 压缩
 
 ## 检索纪律
 
-1. **检索走 zhishibao skill，深读走 Read**：不要用 glob+grep+Read 遍历数据文件替代检索
-2. **不要直接写 SQL 查询 SQLite**：用 zhishibao skill 的对应 action 替代
-3. **Read 数据文件的正确场景**：zhishibao skill 返回断言ID和source ID后，需要深读该来源完整证据时，用 Read 打开具体文件
-4. **L0视图、project.config.md、task_queue.md 等配置/视图文件随时可 Read**
-5. **来源区分必须诚实**：执行回顾中必须严格区分数据来源。hybrid检索结果、schools.jsonl直接读取、concept反查、relations跳转的结果必须分别标注，**不能把直接读jsonl的数据描述为"检索结果"**。schools.jsonl的claim_count等统计数据如使用，必须注明"来自schools.jsonl"
-6. **不能用单一action完成全部分析**：hybrid只是Level 1，必须配合search/concept/relations/open形成完整检索链
+1. **检索走 zhishibao skill，深读走 Read**
+2. **Read 数据文件的正确场景**：zhishibao skill 返回断言ID和source ID后，需要深读该来源完整证据时，用 Read 打开具体文件
+3. **L0视图、project.config.md、task_queue.md 等配置/视图文件随时可 Read**
+4. **来源区分必须诚实**：执行回顾中必须严格区分数据来源。hybrid检索结果、schools.jsonl直接读取、concept反查、relations跳转的结果必须分别标注，**不能把直接读jsonl的数据描述为"检索结果"**。schools.jsonl的claim_count等统计数据如使用，必须注明"来自schools.jsonl"
+5. **不能用单一action完成全部分析**：hybrid只是Level 1，必须配合search/concept/relations/open形成完整检索链
 
 ## 执行模式
 

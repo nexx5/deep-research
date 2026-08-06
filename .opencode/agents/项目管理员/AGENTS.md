@@ -49,7 +49,7 @@ permission:
 6. 创建骨架（从模板库复制+填充配置）
 7. **知识包初始化**（使用 zhishibao skill）：
    - 创建 `knowledge-pack/` 目录结构
-   - 使用 zhishibao skill 初始化 SQLite 库（标准调用方式见 SKILL.md"脚本位置"段；"绕过 skill"指自己写 SQL/手改 jsonl 不走 ingest、自写临时脚本包装调用 skill 脚本，均禁止）
+   - 用 zhishibao skill 初始化 SQLite 库
    - 初始化空的 claims.jsonl 和 relations.jsonl
    - 将初始线索写入 `source-leads.jsonl`
 8. 质量校验（check-plan-review-quality.py）
